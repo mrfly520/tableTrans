@@ -3,6 +3,7 @@ package com.mrfly.kt
 import com.mrfly.java.DatabaseUtil
 import com.mrfly.kt.bean.ColumnInfo
 import com.mrfly.kt.bean.ConnInfo
+import com.mrfly.kt.bean.Matching
 import com.mrfly.kt.bean.TableInfo
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.TableView
@@ -67,6 +68,7 @@ class PersonEditor : View("Person Editor") {
     override val root = BorderPane()
     var fromTable: TableView<ColumnInfo> by singleAssign()
     var toTable: TableView<ColumnInfo> by singleAssign()
+    var matchTable: TableView<Matching> by singleAssign()
     var fromTableName = ""
     var toTableName = ""
     var selectTable: TableView<TableInfo>? = null
@@ -88,6 +90,8 @@ class PersonEditor : View("Person Editor") {
     val toDatabaseUtil = DatabaseUtil(toConnInfo)
     var fromTableNameList = mutableListOf<TableInfo>().asObservable()
     var toTableNameList = mutableListOf<TableInfo>().asObservable()
+    var matchList = mutableListOf<Matching>().asObservable()
+
     fun dataInit(){
         fromConnModel.item = fromConnInfo
         toConnModel.item = toConnInfo
@@ -215,8 +219,7 @@ class PersonEditor : View("Person Editor") {
                     }
                 }
             }
-            // TableView showing a list of people
-            center {
+            left{
                 vbox {
                     hbox {
                         label(fromTableName)
@@ -261,13 +264,47 @@ class PersonEditor : View("Person Editor") {
                             }
                         }
                         column("Type", ColumnInfo::type)
-
-                        // Update the person inside the view model on selection change
-                        /*model.rebindOnChange(this) { selectedPerson ->
-                            person = selectedPerson ?: Person()
-                        }*/
                     }
                 }
+            }
+            // TableView showing a list of people
+            center {
+                vbox {
+                    hbox {
+                        label("匹配方式")
+                        button("匹配"){
+                            action {
+                                if(!matchList.isEmpty()){
+                                    matchList.clear()
+                                }
+                                for (fromColumn in fromColumns) {
+                                    for (toColumn in toColumns) {
+                                        if(fromColumn.name.equals(toColumn.name)){
+                                            matchList.add(Matching(fromColumn,toColumn))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        button("更新添加"){
+                            action{
+
+                            }
+                        }
+                    }
+                    tableview(matchList) {
+                        matchTable = this
+                        column("关键字段",Matching::key){
+                            useCheckbox(true)
+                        }
+                        column("源字段", Matching::fromColumn)
+                        column("目的字段", Matching::toColumn)
+                        column("传输字段",Matching::key){
+                            useCheckbox(true)
+                        }
+                    }
+                }
+
             }
             right {
                 vbox {
@@ -304,6 +341,9 @@ class PersonEditor : View("Person Editor") {
                     }
                     tableview(toColumns) {
                         toTable = this
+                        column("选择",ColumnInfo::selected){
+                            useCheckbox(true)
+                        }
                         column("Name", ColumnInfo::name)
                         column("Type", ColumnInfo::type)
                     }
