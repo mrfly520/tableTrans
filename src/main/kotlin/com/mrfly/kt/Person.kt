@@ -65,7 +65,7 @@ class ConnModel : ItemViewModel<ConnInfo>() {
 }
 
 class PersonEditor : View("Person Editor") {
-    override val root = BorderPane()
+
     var fromTable: TableView<ColumnInfo> by singleAssign()
     var toTable: TableView<ColumnInfo> by singleAssign()
     var matchTable: TableView<Matching> by singleAssign()
@@ -80,11 +80,13 @@ class PersonEditor : View("Person Editor") {
     val toConnModel = ConnModel()
     val fromConnInfo = ConnInfo(
         "carServDev",
-        "jdbc:mysql://192.168.1.229:3306/zoan_admin_dev", "cardev", "Car_dev#68"
+        //"jdbc:mysql://192.168.1.229:3306/zoan_admin_dev", "cardev", "Car_dev#68"
+        "jdbc:mysql://127.0.0.1:3306/tabletrans?serverTimezone=UTC", "root", "123456"
     )
     val toConnInfo = ConnInfo(
         "carServTest",
-        "jdbc:mysql://192.168.1.240:3306/car_search", "cartest", "Car_test#68"
+        //"jdbc:mysql://192.168.1.240:3306/car_search"
+        "jdbc:mysql://127.0.0.1:3306/tabletrans?serverTimezone=UTC","root","123456"
     );
     val fromDatabaseUtil = DatabaseUtil(fromConnInfo)
     val toDatabaseUtil = DatabaseUtil(toConnInfo)
@@ -102,6 +104,7 @@ class PersonEditor : View("Person Editor") {
             toTableNameList.add(TableInfo(tableName, ""))
         }
     }
+    override val root = BorderPane()
     init {
         if(fromConnInfo!=null&&toConnInfo!=null){
             dataInit()
@@ -288,7 +291,29 @@ class PersonEditor : View("Person Editor") {
                         }
                         button("更新添加"){
                             action{
+                                var transList = mutableListOf<Matching>()
+                                var keyList = mutableListOf<Matching>()
 
+                                var selectColumns = mutableListOf<String>()
+                                for (matching in matchList) {
+                                    if(matching.key!=null&&matching.key==true){
+                                        keyList.add(matching)
+                                    }
+                                    if(matching.trans!=null&&matching.trans==true){
+                                        transList.add(matching)
+                                    }
+                                    selectColumns.add(matching.fromColumn)
+                                }
+                                var selects = selectColumns.joinToString(",")
+
+                                var selectSql = "select "+selects+" from "+fromTableName;
+                                var updateSql = "update "+toTableName+" set "+"where"
+                                var setList = mutableListOf<String>()
+                                for (matching in transList) {
+                                    var setName = matching.toColumn
+                                    var setValue =
+                                    setList.add(matching.toColumn)
+                                }
                             }
                         }
                     }
@@ -299,7 +324,7 @@ class PersonEditor : View("Person Editor") {
                         }
                         column("源字段", Matching::fromColumn)
                         column("目的字段", Matching::toColumn)
-                        column("传输字段",Matching::key){
+                        column("传输字段",Matching::trans){
                             useCheckbox(true)
                         }
                     }

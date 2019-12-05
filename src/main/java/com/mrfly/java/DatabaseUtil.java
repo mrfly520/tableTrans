@@ -1,8 +1,6 @@
 package com.mrfly.java;
 
 
-
-
 import com.mrfly.kt.bean.ColumnInfo;
 import com.mrfly.kt.bean.ConnInfo;
 
@@ -24,6 +22,45 @@ public class DatabaseUtil {
     public DatabaseUtil(ConnInfo connInfo){
          this.connInfo = connInfo;
     }
+
+    public int execute(String sql) {
+        Connection conn = getConnection();
+        int count = 0;
+        //String sql = "update students set Age='" + student.getAge() + "' where Name='" + student.getName() + "'";
+        PreparedStatement pstmt;
+        try {
+            pstmt = conn.prepareStatement(sql);
+            count = pstmt.executeUpdate();
+            System.out.println("resutl: " + count);
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
+    public int execute(String sql,List<?> list) {
+        Connection conn = getConnection();
+        int count = 0;
+        //String sql = "update students set Age='" + student.getAge() + "' where Name='" + student.getName() + "'";
+        PreparedStatement pstmt;
+        try {
+            pstmt = conn.prepareStatement(sql);
+            int index =1;
+            for (Object value : list) {
+                pstmt.setObject(index,value);
+                index++;
+            }
+            count = pstmt.executeUpdate();
+            System.out.println("resutl: " + count);
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
     /**
      * 获取数据库连接
      *
@@ -38,6 +75,7 @@ public class DatabaseUtil {
         }
         return conn;
     }
+
 
     /**
      * 关闭数据库连接

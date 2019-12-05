@@ -5,4 +5,5 @@ class Matching(fromColumn: ColumnInfo, toColumn: ColumnInfo) {
     var trans: Boolean? = false
     var fromColumn = fromColumn.name
     var toColumn = toColumn.name
+    var value = ""
 }
